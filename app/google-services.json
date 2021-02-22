@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1078020425429",
+    "project_id": "kikhobor-f1e85",
+    "storage_bucket": "kikhobor-f1e85.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1078020425429:android:6af6c792eda5f93b0dc45c",
+        "android_client_info": {
+          "package_name": "com.hrithik.kikhobor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1078020425429-c7g3l9o2pi47uu15nptcm7u3rdja0bm7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUfQ67cic6LvB4aGt92nTJYGSl0p68128"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1078020425429-c7g3l9o2pi47uu15nptcm7u3rdja0bm7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
