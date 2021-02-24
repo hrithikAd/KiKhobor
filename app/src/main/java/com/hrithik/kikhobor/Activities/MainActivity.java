@@ -5,25 +5,41 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.icu.util.Currency;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.hrithik.kikhobor.Adapters.GroupAdapter;
 import com.hrithik.kikhobor.Adapters.TopStatusAdapter;
+import com.hrithik.kikhobor.Models.Message;
 import com.hrithik.kikhobor.Models.Status;
 import com.hrithik.kikhobor.Models.UserStatus;
 import com.hrithik.kikhobor.R;
@@ -40,6 +56,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -51,9 +68,17 @@ public class MainActivity extends AppCompatActivity {
     TopStatusAdapter statusAdapter;
     ArrayList<UserStatus> userStatuses;
     ProgressDialog dialog;
+    DatabaseReference mMessageDatabaseReference;
+
+    ChildEventListener mChildEventListener;
 
     User user;
 
+
+
+    Button sendBtn;
+
+    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,14 +90,76 @@ public class MainActivity extends AppCompatActivity {
         dialog.setCancelable(false);
 
         database = FirebaseDatabase.getInstance();
-        users = new ArrayList<>();
         userStatuses = new ArrayList<>();
 
-        database.getReference().child("users").child(FirebaseAuth.getInstance().getUid())
-                .addValueEventListener(new ValueEventListener() {
+        ArrayList<Message> message = new ArrayList<>();
+
+
+
+
+
+        statusAdapter = new TopStatusAdapter(this, userStatuses);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(RecyclerView.HORIZONTAL);
+        binding.statusList.setLayoutManager(layoutManager);
+        binding.statusList.setAdapter(statusAdapter);
+
+
+        binding.statusList.showShimmerAdapter();
+
+
+
+
+
+
+
+
+
+        //group chat
+
+
+
+
+        mMessageDatabaseReference = database.getReference().child("messages");
+
+
+
+        ImageView sendbtn = (ImageView) findViewById(R.id.sendBtn2);
+
+        sendbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO: Send messages on click
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                String uid = user.getUid();
+
+
+
+
+
+                database.getReference().child("users").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        user = snapshot.getValue(User.class);
+                        for(DataSnapshot snapshot1 : snapshot.getChildren()) {
+                            User user = snapshot1.getValue(User.class);
+                            if(user.getUid().equals(FirebaseAuth.getInstance().getUid())) {
+
+                                EditText messageBox = (EditText) findViewById(R.id.messageBox2);
+                                Message Message = new Message(messageBox.getText().toString(), user.getName(), user.getProfileImage(), 123 );
+
+                                mMessageDatabaseReference.push().setValue(Message);
+                                messageBox.setText("");
+
+
+
+                            }
+
+
+
+
+
+                        }
                     }
 
                     @Override
@@ -82,38 +169,59 @@ public class MainActivity extends AppCompatActivity {
                 });
 
 
-        usersAdapter = new UsersAdapter(this, users);
-        statusAdapter = new TopStatusAdapter(this, userStatuses);
-//        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setOrientation(RecyclerView.HORIZONTAL);
-        binding.statusList.setLayoutManager(layoutManager);
-        binding.statusList.setAdapter(statusAdapter);
 
-        binding.recyclerView.setAdapter(usersAdapter);
 
-        binding.recyclerView.showShimmerAdapter();
-        binding.statusList.showShimmerAdapter();
 
-        database.getReference().child("users").addValueEventListener(new ValueEventListener() {
+            }
+        });
+
+
+        mChildEventListener = new ChildEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                users.clear();
-                for(DataSnapshot snapshot1 : snapshot.getChildren()) {
-                    User user = snapshot1.getValue(User.class);
-                    if(!user.getUid().equals(FirebaseAuth.getInstance().getUid()))
-                        users.add(user);
-                }
-                binding.recyclerView.hideShimmerAdapter();
-                usersAdapter.notifyDataSetChanged();
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+
+                Message message1 = snapshot.getValue(Message.class);
+                message.add(message1);
+
+                RecyclerView recyclerview = findViewById(R.id.recyclerMsgView);
+                GroupAdapter adapter = new GroupAdapter(MainActivity.this,message);
+
+                 recyclerview.setAdapter(adapter);
+                 recyclerview.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        });
+        };
+        mMessageDatabaseReference.addChildEventListener(mChildEventListener);
 
+
+
+
+
+
+
+
+        //stories
         database.getReference().child("stories").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -147,37 +255,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        binding.bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.inbox:
-                        Intent intent = new Intent(MainActivity.this, InboxActivity.class);
-                        MainActivity.this.startActivity(intent);
-                        break;
 
-                    case R.id.voicechat:
-
-                        
-                        JitsiMeetConferenceOptions options = new JitsiMeetConferenceOptions.Builder()
-                                .setRoom("KiKhobor")
-                                .setVideoMuted(true)
-                                .setAudioMuted(false)
-                                .setAudioOnly(false)
-                                .setFeatureFlag("meeting-password.enabled", false)
-                                .setFeatureFlag("live-streaming.enabled", false)
-                                .setFeatureFlag("tile-view.enabled", true)
-                                .setFeatureFlag("help.enabled", false)
-                                .setFeatureFlag("invite.enabled", false)
-                                .setFeatureFlag("ios.recording.enabled", false)
-
-                                .build();
-                        JitsiMeetActivity.launch(MainActivity.this,options);
-                        break;
-                }
-                return false;
-            }
-        });
 
     }
 
@@ -239,6 +317,35 @@ public class MainActivity extends AppCompatActivity {
            // case R.id.search:
            //     Toast.makeText(this, "Search clicked.", Toast.LENGTH_SHORT).show();
            //     break;
+            case R.id.logout:
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(MainActivity.this, PhoneNumberActivity.class));
+            case R.id.inbox:
+                Intent intent = new Intent(MainActivity.this, InboxActivity.class);
+                MainActivity.this.startActivity(intent);
+                break;
+
+            case R.id.voicecall:
+
+
+                JitsiMeetConferenceOptions options = new JitsiMeetConferenceOptions.Builder()
+                        .setRoom("KiKhobor")
+                        .setVideoMuted(true)
+                        .setAudioMuted(false)
+                        .setAudioOnly(false)
+                        .setFeatureFlag("meeting-password.enabled", false)
+                        .setFeatureFlag("live-streaming.enabled", false)
+                        .setFeatureFlag("tile-view.enabled", true)
+                        .setFeatureFlag("help.enabled", false)
+                        .setFeatureFlag("invite.enabled", false)
+                        .setFeatureFlag("ios.recording.enabled", false)
+                        .setFeatureFlag("meeting-name.enabled", false)
+                        .build();
+                JitsiMeetActivity.launch(MainActivity.this,options);
+                break;
+
+
+
         }
         return super.onOptionsItemSelected(item);
     }

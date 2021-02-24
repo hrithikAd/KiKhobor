@@ -4,6 +4,8 @@ public class Message {
     private String messageId, message, senderId;
     private long timestamp;
     private int feeling = -1;
+    private String photoUrl;
+    private String name;
 
     public Message() {
     }
@@ -11,6 +13,13 @@ public class Message {
     public Message(String message, String senderId, long timestamp) {
         this.message = message;
         this.senderId = senderId;
+        this.timestamp = timestamp;
+    }
+
+    public Message(String message, String name, String photoUrl, long timestamp) {
+        this.message = message;
+        this.name= name;
+        this.photoUrl = photoUrl;
         this.timestamp = timestamp;
     }
 
@@ -38,6 +47,9 @@ public class Message {
         this.senderId = senderId;
     }
 
+    public String setName(){return name;}
+    public String setPhotoUrl(){return photoUrl;}
+
     public long getTimestamp() {
         return timestamp;
     }
@@ -53,4 +65,7 @@ public class Message {
     public void setFeeling(int feeling) {
         this.feeling = feeling;
     }
+
+    public String getName(){return name;}
+    public String getPhotoUrl(){return photoUrl;}
 }

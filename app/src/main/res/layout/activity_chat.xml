@@ -39,21 +39,7 @@
                 android:padding="8dp"
                 android:textSize="14sp" />
 
-            <ImageView
-                android:id="@+id/attachment"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginRight="12dp"
-                android:tint="#676767"
-                app:srcCompat="@drawable/ic_attachment" />
 
-            <ImageView
-                android:id="@+id/camera"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginRight="12dp"
-                android:tint="#676767"
-                app:srcCompat="@drawable/ic_camera" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
