@@ -2,6 +2,7 @@ package com.hrithik.kikhobor.Adapters;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +14,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.hrithik.kikhobor.Activities.ChatActivity;
 import com.hrithik.kikhobor.Models.Message;
+import com.hrithik.kikhobor.Models.User;
 import com.hrithik.kikhobor.R;
 
 import java.util.ArrayList;
@@ -54,6 +61,8 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.ViewHolder> 
         holder.username.setText(message.getName());
 
        // holder.msgTime.setText((int) message.getTimestamp());
+
+
 
     }
 

@@ -150,16 +150,8 @@ public class MainActivity extends AppCompatActivity {
 
                                 mMessageDatabaseReference.push().setValue(Message);
                                 messageBox.setText("");
-
-
-
                             }
-
-
-
-
-
-                        }
+}
                     }
 
                     @Override
